@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -23,4 +24,8 @@ Route::group(['middleware' => 'api', 'prefix' => 'v1'], function () {
     Route::post('/user/login', [UserController::class, 'login'])->name('api.login');
     Route::post('/user/create', [UserController::class, 'store'])->name('api.storeUser');
     Route::get('/user/', [UserController::class, 'index'])->name('api.userIndex');
+
+    Route::get('/course/', [CourseController::class, 'index'])->name('api.courseIndex');
+    Route::get('/course/{course}/users', [CourseController::class, 'getCourseUsers'])->name('api.courseUsersIndex');
+    Route::post('/course/{course}/addUser', [CourseController::class, 'addUser'])->name('api.courseAddUser');
 });
