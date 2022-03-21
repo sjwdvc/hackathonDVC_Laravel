@@ -20,5 +20,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::group(['middleware' => 'api', 'prefix' => 'v1'], function () {
-    Route::post('/login', [UserController::class, 'login'])->name('api.storePerson');
+    Route::post('/user/login', [UserController::class, 'login'])->name('api.login');
+    Route::post('/user/create', [UserController::class, 'store'])->name('api.storeUser');
 });

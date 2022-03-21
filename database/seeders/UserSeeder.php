@@ -16,7 +16,10 @@ class UserSeeder extends Seeder
     public function run(Faker $faker)
     {
         User::create([
-            'name' => $faker->name,
+            'firstname' => $faker->firstName,
+            'prefix' => $faker->word,
+            'surname' => $faker->lastName,
+            'uniqueCode' => '',
             'email' => 'admin@hackathon.nl',
             'password' => bcrypt('Welkom01'),
             'role_id' => 1,

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -32,11 +33,57 @@ class UserController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
-        //
+        try {
+
+            $validator = Validator::make($request->all(), [
+                'email' => 'required|string|email|unique:users,email',
+                'password' => 'required|string|min:8',
+                'firstname' => 'string|required',
+                'prefix' => 'string',
+                'surname' => 'string|required',
+                'role_id' => 'integer|exists:roles,id'
+            ]);
+
+            if($validator->passes()){
+                $uniqueCode = Hash::make($request['email']);
+
+                $user = User::create([
+                    'firstname' => $request['firstname'],
+                    'prefix' => $request['prefix'],
+                    'surname' => $request['surname'],
+                    'email' => $request['email'],
+                    'password' => bcrypt($request['password']),
+                    'role_id' => $request['role_id'],
+                    'uniqueCode' => $uniqueCode
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'uniqueCode' => $uniqueCode
+                ]);
+            }
+            else{
+                return response()->json([
+                    'success' => false,
+                    'exception' =>false,
+                    'errors' => $validator->errors()
+                ]);
+            }
+        }
+        catch(\Exception $e){
+            return response()->json([
+                'success' => false,
+                'exception' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
+
+
+
     }
 
     /**
@@ -85,24 +132,47 @@ class UserController extends Controller
     }
 
     public function login(Request $request){
-        $this->validate($request, [
-            'email' => 'required|string|email|exists:users,email',
-            'password' => 'required|string',
-        ]);
-        $user = User::where('email','=',$request['email'])->first();
-        if(Hash::check($request['password'], $user->password)){
-            return response()->json(
-                [
-                    'success' => true,
-                    'role' => $user->role
-                ]
-            );
+        try {
+            $validator = Validator::make($request->all(), [
+                'email' => 'required|string|email|exists:users,email',
+                'password' => 'required|string',
+            ]);
+
+            if ($validator->passes()) {
+                $user = User::where('email', '=', $request['email'])->first();
+                if (Hash::check($request['password'], $user->password)) {
+                    return response()->json(
+                        [
+                            'success' => true,
+                            'role' => $user->role
+                        ]
+                    );
+                } else {
+                    return response()->json(
+                        [
+                            'success' => false,
+                            'exception' => false,
+                            'errors' => null,
+                            'message' => "Incorrect email or password.",
+                        ]
+                    );
+                }
+            } else {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'exception' => false,
+                        'errors' => $validator->errors(),
+                    ]
+                );
+            }
         }
-        else{
+        catch(\Exception $e){
             return response()->json(
                 [
                     'success' => false,
-                    'role' => null
+                    'exception' => true,
+                    'message' => $e->getMessage(),
                 ]
             );
         }
