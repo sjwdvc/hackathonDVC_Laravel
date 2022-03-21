@@ -28,4 +28,5 @@ Route::group(['middleware' => 'api', 'prefix' => 'v1'], function () {
     Route::get('/course/', [CourseController::class, 'index'])->name('api.courseIndex');
     Route::get('/course/{course}/users', [CourseController::class, 'getCourseUsers'])->name('api.courseUsersIndex');
     Route::post('/course/{course}/addUser', [CourseController::class, 'addUser'])->name('api.courseAddUser');
+    Route::post('/course/{course}/markUserPresent', [CourseController::class, 'markUserPresent'])->name('api.courseMarkUserPresent');
 });

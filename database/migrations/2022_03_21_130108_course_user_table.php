@@ -17,6 +17,7 @@ class CourseUserTable extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('course_id');
+            $table->boolean('present')->default(false);
             $table->timestamps();
         });
     }

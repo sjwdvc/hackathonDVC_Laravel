@@ -141,4 +141,37 @@ class CourseController extends Controller
             ]);
         }
     }
+
+    public function markUserPresent(Request $request, Course $course){
+        try{
+            $validator = Validator::make($request->all(), [
+                'uniqueCode' => 'required|exists:users,uniqueCode',
+            ]);
+
+            if($validator->passes()){
+                $user = User::where('uniqueCode', '=',$request['uniqueCode'])->first();
+                if($course->users()->where('user_id', $user->id)->exists()){
+                    $course->users()->updateExistingPivot($user, ['present' =>true]);
+                }
+
+                return response()->json([
+                    'success' => true,
+                ]);
+            }
+            else{
+                return response()->json([
+                    'success' => false,
+                    'exception' =>false,
+                    'errors' => $validator->errors()
+                ]);
+            }
+        }
+        catch(\Exception $e){
+            return response()->json([
+                'success' => false,
+                'exception' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
 }
