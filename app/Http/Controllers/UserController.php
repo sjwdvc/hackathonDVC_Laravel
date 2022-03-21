@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\User as UserResource;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -12,11 +14,20 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function index()
     {
-        //
+        try{
+            return UserResource::collection(User::all());
+        }
+        catch(\Exception $e){
+            return response()->json([
+                'success' => false,
+                'exception' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -45,7 +56,7 @@ class UserController extends Controller
                 'firstname' => 'string|required',
                 'prefix' => 'string',
                 'surname' => 'string|required',
-                'role_id' => 'integer|exists:roles,id'
+                'role' => 'string|exists:roles,name'
             ]);
 
             if($validator->passes()){
@@ -57,7 +68,7 @@ class UserController extends Controller
                     'surname' => $request['surname'],
                     'email' => $request['email'],
                     'password' => bcrypt($request['password']),
-                    'role_id' => $request['role_id'],
+                    'role_id' => Role::where('name','=',$request['role'])->first()->id,
                     'uniqueCode' => $uniqueCode
                 ]);
 
@@ -81,9 +92,6 @@ class UserController extends Controller
                 'message' => $e->getMessage(),
             ]);
         }
-
-
-
     }
 
     /**
