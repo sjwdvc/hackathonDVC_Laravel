@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class UserController extends Controller
 {
@@ -61,6 +62,9 @@ class UserController extends Controller
 
             if($validator->passes()){
                 $uniqueCode = Hash::make($request['email']);
+                //make QR
+//                QrCode::format('png');
+                $qrcode = QrCode::generate($uniqueCode);
 
                 $user = User::create([
                     'firstname' => $request['firstname'],
@@ -69,7 +73,8 @@ class UserController extends Controller
                     'email' => $request['email'],
                     'password' => bcrypt($request['password']),
                     'role_id' => Role::where('name','=',$request['role'])->first()->id,
-                    'uniqueCode' => $uniqueCode
+                    'uniqueCode' => $uniqueCode,
+                    'qrcode' => $qrcode
                 ]);
 
                 return response()->json([
@@ -98,11 +103,38 @@ class UserController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show($id)
+    public function show(Request $request)
     {
-        //
+        try {
+            $validator = Validator::make($request->all(), [
+                'uniqueCode' => 'required|string|exists:users,uniqueCode',
+            ]);
+
+            if ($validator->passes()) {
+                $user = User::where('uniqueCode', '=', $request['uniqueCode'])->first();
+                //show all info about 1 user
+                return response()->json(new UserResource($user));
+            } else {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'exception' => false,
+                        'errors' => $validator->errors(),
+                    ]
+                );
+            }
+        }
+        catch(\Exception $e){
+            return response()->json(
+                [
+                    'success' => false,
+                    'exception' => true,
+                    'message' => $e->getMessage(),
+                ]
+            );
+        }
     }
 
     /**

@@ -23,6 +23,7 @@ class UserSeeder extends Seeder
             'email' => 'admin@hackathon.nl',
             'password' => bcrypt('Welkom01'),
             'role_id' => 1,
+            'qrcode' => 'ABC'
         ]);
     }
 }

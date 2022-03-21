@@ -22,6 +22,7 @@ class CreateUsersTable extends Migration
             $table->string('uniqueCode')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->text('qrcode');
             $table->unsignedBigInteger('role_id');
             $table->rememberToken();
             $table->timestamps();

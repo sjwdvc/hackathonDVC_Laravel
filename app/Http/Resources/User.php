@@ -16,6 +16,7 @@ class User extends JsonResource
             'email' => $this->email,
             'uniqueCode' => $this->uniqueCode,
             'role' => $this->role->name,
+            'qrcode' => $this->qrcode,
 //            'courses' => CourseResource::collection($this->courses)
         ];
     }
